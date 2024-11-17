@@ -511,7 +511,12 @@ static void *heartbeat_checker(void *)
         } else {
           if (heartbeat_detla > disconnect / 2) {
             LOG_DEBUG(client.get(), "Checking if client still alive.");
-            client->dc->send("ping");
+            try {
+              client->dc->send("ping");
+            } catch(const std::exception &e) {
+              LOG_INFO(client.get(), "Sending heartbeat to client failed, removing.");
+              it = webrtc_clients.erase(it);
+            }
           }
           it++;
         }
